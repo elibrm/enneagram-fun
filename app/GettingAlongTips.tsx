@@ -1,7 +1,7 @@
 'use client';
 
-import { EnneagramType } from '@/data/types';
-import { compatibility } from '@/data/compatibility';
+import { EnneagramType } from './types';
+import { compatibility } from './compatibility';
 
 interface Props {
   typeA: EnneagramType;
