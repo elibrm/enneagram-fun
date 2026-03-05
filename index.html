@@ -2,136 +2,592 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enneagram Explorer</title>
 <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.65;
-  color: #333333;
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  background: #ffffff;
-}
-h1 { font-size: 32px; font-weight: 700; color: #1a1a2e; margin-top: 36px; margin-bottom: 14px; border-bottom: 2px solid #0d7377; padding-bottom: 8px; }
-h2 { font-size: 24px; font-weight: 600; color: #1a1a2e; margin-top: 8px; margin-bottom: 14px; }
-h3 { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-top: 24px; margin-bottom: 10px; }
-h4 { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-top: 20px; margin-bottom: 8px; }
-p { margin-bottom: 14px; }
-ul, ol { margin-bottom: 14px; padding-left: 24px; }
-li { margin-bottom: 5px; }
-blockquote {
-  border-left: 4px solid #0d7377;
-  padding: 12px 20px;
-  margin: 16px 0;
-  background: #f8fafa;
-  color: #333333;
-}
-table { border-collapse: collapse; width: 100%; margin-bottom: 16px; }
-th { border-bottom: 2px solid #dddddd; padding: 8px 12px; text-align: left; font-weight: bold; }
-td { border-bottom: 1px solid #eeeeee; padding: 8px 12px; text-align: left; }
-code { font-family: Menlo, 'Courier New', monospace; font-size: 14px; background: #f4f4f8; padding: 2px 5px; }
-pre { background: #f4f4f8; padding: 16px; overflow-x: auto; margin-bottom: 16px; }
-pre code { background: none; padding: 0; }
-hr { border: none; border-top: 1px solid #e0e0e0; margin: 28px 0; }
-a { color: #0d7377; }
-strong { font-weight: bold; }
-em { font-style: italic; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 48px 20px 32px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e7;
+  }
+
+  header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 17px;
+    color: #6e6e73;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e7;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .controls button {
+    padding: 8px 18px;
+    border: 1px solid #d2d2d7;
+    border-radius: 20px;
+    background: #ffffff;
+    color: #1d1d1f;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .controls button:hover {
+    background: #f0f0f2;
+  }
+
+  .controls button.active {
+    background: #1a1a2e;
+    color: #ffffff;
+    border-color: #1a1a2e;
+  }
+
+  .compare-hint {
+    display: none;
+    text-align: center;
+    padding: 12px 20px;
+    background: #fef9e7;
+    border-bottom: 1px solid #f0e6b2;
+    font-size: 14px;
+    color: #7d6608;
+  }
+
+  .compare-hint.visible {
+    display: block;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* Grid mode for cards */
+  .grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  /* List mode */
+  .list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Compare mode */
+  .compare-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 640px) {
+    .compare-view { grid-template-columns: 1fr; }
+  }
+
+  .type-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 2px solid transparent;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .type-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+
+  .type-card.expanded {
+    cursor: default;
+  }
+
+  .type-card.compare-selected {
+    border-color: #0d7377;
+    box-shadow: 0 0 0 1px #0d7377;
+  }
+
+  .card-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+  }
+
+  .card-emoji {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--type-bg);
+    border-radius: 12px;
+  }
+
+  .card-title-group {
+    flex: 1;
+  }
+
+  .card-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--type-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  .card-chevron {
+    font-size: 20px;
+    color: #aaa;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+
+  .type-card.expanded .card-chevron {
+    transform: rotate(180deg);
+  }
+
+  .card-preview {
+    padding: 0 24px 16px;
+    font-size: 14px;
+    color: #6e6e73;
+  }
+
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .type-card.expanded .card-body {
+    max-height: 800px;
+  }
+
+  .card-content {
+    padding: 0 24px 24px;
+  }
+
+  .card-section {
+    margin-bottom: 18px;
+  }
+
+  .card-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .card-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--type-color);
+    margin-bottom: 4px;
+  }
+
+  .card-value {
+    font-size: 15px;
+    color: #333;
+  }
+
+  .wing-card {
+    background: #f9f9fb;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 8px;
+  }
+
+  .wing-card + .wing-card {
+    margin-top: 8px;
+  }
+
+  .wing-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1a1a2e;
+    margin-bottom: 3px;
+  }
+
+  .wing-desc {
+    font-size: 14px;
+    color: #555;
+  }
+
+  .core-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .trait-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--type-bg);
+    color: var(--type-color);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* Compare panel styling */
+  .compare-view .type-card {
+    cursor: default;
+  }
+
+  .compare-view .type-card .card-body {
+    max-height: 800px;
+  }
+
+  .compare-view .card-chevron {
+    display: none;
+  }
+
+  .compare-placeholder {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 2px dashed #d2d2d7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: #aaa;
+    font-size: 16px;
+  }
+
+  /* Type colours */
+  .type-1 { --type-color: #6b4c9a; --type-bg: #f3eef9; }
+  .type-2 { --type-color: #c0392b; --type-bg: #fdf0ef; }
+  .type-3 { --type-color: #d4a017; --type-bg: #fdf8e8; }
+  .type-4 { --type-color: #2e4057; --type-bg: #edf0f4; }
+  .type-5 { --type-color: #0d7377; --type-bg: #eaf5f5; }
+  .type-6 { --type-color: #7d6608; --type-bg: #f9f5e3; }
+  .type-7 { --type-color: #e67e22; --type-bg: #fef4e8; }
+  .type-8 { --type-color: #8b0000; --type-bg: #f9ecec; }
+  .type-9 { --type-color: #3c763d; --type-bg: #eef7ee; }
+
+  footer {
+    text-align: center;
+    padding: 32px 20px;
+    font-size: 13px;
+    color: #aaa;
+    border-top: 1px solid #e5e5e7;
+    background: #fff;
+  }
 </style>
 </head>
 <body>
 
-<h1>Enneagram Cheat Sheet</h1>
+<header>
+  <h1>Enneagram Explorer</h1>
+  <p>Click any type to explore its core traits, fears, desires, and wings</p>
+</header>
 
-<hr>
-<h2>⚖️ Type 1 – The Reformer</h2>
-<p><strong>Core:</strong> Principled, purposeful, self-controlled, perfectionistic</p>
-<p><strong>Fear:</strong> Being corrupt or defective</p>
-<p><strong>Desire:</strong> To be good and have integrity</p>
-<ul>
-<li><strong>Wing 1w9 (The Idealist):</strong> More detached, calm, objective, philosophical</li>
-<li><strong>Wing 1w2 (The Advocate):</strong> More warm, helpful, critical of injustice, action-oriented</li>
-</ul>
+<div class="controls">
+  <button id="btn-all" class="active" onclick="setView('list')">All Types</button>
+  <button id="btn-grid" onclick="setView('grid')">Grid</button>
+  <button id="btn-compare" onclick="setView('compare')">Compare</button>
+  <button id="btn-expand" onclick="expandAll()">Expand All</button>
+  <button id="btn-collapse" onclick="collapseAll()">Collapse All</button>
+</div>
 
-<hr>
-<h2>💝 Type 2 – The Helper</h2>
-<p><strong>Core:</strong> Generous, demonstrative, people-pleasing, possessive</p>
-<p><strong>Fear:</strong> Being unloved or unwanted</p>
-<p><strong>Desire:</strong> To feel loved</p>
-<ul>
-<li><strong>Wing 2w1 (The Servant):</strong> More idealistic, principled, self-critical, controlled</li>
-<li><strong>Wing 2w3 (The Host/Hostess):</strong> More ambitious, image-conscious, charming, outgoing</li>
-</ul>
+<div class="compare-hint" id="compare-hint">
+  Select two types below to compare them side by side
+</div>
 
-<hr>
-<h2>🏆 Type 3 – The Achiever</h2>
-<p><strong>Core:</strong> Adaptable, excelling, driven, image-conscious</p>
-<p><strong>Fear:</strong> Being worthless or without value</p>
-<p><strong>Desire:</strong> To feel valuable and worthwhile</p>
-<ul>
-<li><strong>Wing 3w2 (The Charmer):</strong> More sociable, encouraging, people-oriented, flattering</li>
-<li><strong>Wing 3w4 (The Professional):</strong> More introspective, emotionally aware, artistic, reserved</li>
-</ul>
+<div class="container">
+  <div id="card-container" class="list-view"></div>
+  <div id="compare-container" class="compare-view" style="display:none;"></div>
+</div>
 
-<hr>
-<h2>🎨 Type 4 – The Individualist</h2>
-<p><strong>Core:</strong> Expressive, dramatic, self-absorbed, temperamental</p>
-<p><strong>Fear:</strong> Having no identity or personal significance</p>
-<p><strong>Desire:</strong> To find themselves and their significance</p>
-<ul>
-<li><strong>Wing 4w3 (The Aristocrat):</strong> More ambitious, polished, sociable, competitive</li>
-<li><strong>Wing 4w5 (The Bohemian):</strong> More withdrawn, intellectual, unconventional, private</li>
-</ul>
+<footer>
+  Based on Riso-Hudson Enneagram typology
+</footer>
 
-<hr>
-<h2>🔍 Type 5 – The Investigator</h2>
-<p><strong>Core:</strong> Perceptive, innovative, secretive, isolated</p>
-<p><strong>Fear:</strong> Being helpless, incapable, or overwhelmed</p>
-<p><strong>Desire:</strong> To be capable and competent</p>
-<ul>
-<li><strong>Wing 5w4 (The Iconoclast):</strong> More creative, subjective, emotionally intense, independent</li>
-<li><strong>Wing 5w6 (The Problem Solver):</strong> More analytical, loyal, cautious, collaborative</li>
-</ul>
+<script>
+const types = [
+  {
+    num: 1, name: "The Reformer", emoji: "⚖️",
+    traits: ["Principled", "Purposeful", "Self-controlled", "Perfectionistic"],
+    fear: "Being corrupt or defective",
+    desire: "To be good and have integrity",
+    wings: [
+      { code: "1w9", name: "The Idealist", desc: "More detached, calm, objective, philosophical" },
+      { code: "1w2", name: "The Advocate", desc: "More warm, helpful, critical of injustice, action-oriented" }
+    ]
+  },
+  {
+    num: 2, name: "The Helper", emoji: "💝",
+    traits: ["Generous", "Demonstrative", "People-pleasing", "Possessive"],
+    fear: "Being unloved or unwanted",
+    desire: "To feel loved",
+    wings: [
+      { code: "2w1", name: "The Servant", desc: "More idealistic, principled, self-critical, controlled" },
+      { code: "2w3", name: "The Host/Hostess", desc: "More ambitious, image-conscious, charming, outgoing" }
+    ]
+  },
+  {
+    num: 3, name: "The Achiever", emoji: "🏆",
+    traits: ["Adaptable", "Excelling", "Driven", "Image-conscious"],
+    fear: "Being worthless or without value",
+    desire: "To feel valuable and worthwhile",
+    wings: [
+      { code: "3w2", name: "The Charmer", desc: "More sociable, encouraging, people-oriented, flattering" },
+      { code: "3w4", name: "The Professional", desc: "More introspective, emotionally aware, artistic, reserved" }
+    ]
+  },
+  {
+    num: 4, name: "The Individualist", emoji: "🎨",
+    traits: ["Expressive", "Dramatic", "Self-absorbed", "Temperamental"],
+    fear: "Having no identity or personal significance",
+    desire: "To find themselves and their significance",
+    wings: [
+      { code: "4w3", name: "The Aristocrat", desc: "More ambitious, polished, sociable, competitive" },
+      { code: "4w5", name: "The Bohemian", desc: "More withdrawn, intellectual, unconventional, private" }
+    ]
+  },
+  {
+    num: 5, name: "The Investigator", emoji: "🔍",
+    traits: ["Perceptive", "Innovative", "Secretive", "Isolated"],
+    fear: "Being helpless, incapable, or overwhelmed",
+    desire: "To be capable and competent",
+    wings: [
+      { code: "5w4", name: "The Iconoclast", desc: "More creative, subjective, emotionally intense, independent" },
+      { code: "5w6", name: "The Problem Solver", desc: "More analytical, loyal, cautious, collaborative" }
+    ]
+  },
+  {
+    num: 6, name: "The Loyalist", emoji: "🛡️",
+    traits: ["Engaging", "Responsible", "Anxious", "Suspicious"],
+    fear: "Being without support or guidance",
+    desire: "To have security and support",
+    wings: [
+      { code: "6w5", name: "The Defender", desc: "More introverted, analytical, independent, detached" },
+      { code: "6w7", name: "The Buddy", desc: "More outgoing, playful, distractible, reassurance-seeking" }
+    ]
+  },
+  {
+    num: 7, name: "The Enthusiast", emoji: "✨",
+    traits: ["Spontaneous", "Versatile", "Distractible", "Scattered"],
+    fear: "Being deprived or trapped in pain",
+    desire: "To be satisfied and fulfilled",
+    wings: [
+      { code: "7w6", name: "The Entertainer", desc: "More loyal, endearing, anxious, relationship-oriented" },
+      { code: "7w8", name: "The Realist", desc: "More assertive, pragmatic, competitive, intense" }
+    ]
+  },
+  {
+    num: 8, name: "The Challenger", emoji: "💪",
+    traits: ["Self-confident", "Decisive", "Willful", "Confrontational"],
+    fear: "Being controlled or harmed by others",
+    desire: "To protect themselves and control their fate",
+    wings: [
+      { code: "8w7", name: "The Maverick", desc: "More energetic, outgoing, impulsive, entrepreneurial" },
+      { code: "8w9", name: "The Bear", desc: "More calm, receptive, stubborn, quietly commanding" }
+    ]
+  },
+  {
+    num: 9, name: "The Peacemaker", emoji: "🕊️",
+    traits: ["Receptive", "Reassuring", "Agreeable", "Complacent"],
+    fear: "Loss and separation",
+    desire: "Inner peace and stability",
+    wings: [
+      { code: "9w8", name: "The Comfort Seeker", desc: "More assertive, grounded, stubborn, body-aware" },
+      { code: "9w1", name: "The Dreamer", desc: "More idealistic, orderly, detached, principled" }
+    ]
+  }
+];
 
-<hr>
-<h2>🛡️ Type 6 – The Loyalist</h2>
-<p><strong>Core:</strong> Engaging, responsible, anxious, suspicious</p>
-<p><strong>Fear:</strong> Being without support or guidance</p>
-<p><strong>Desire:</strong> To have security and support</p>
-<ul>
-<li><strong>Wing 6w5 (The Defender):</strong> More introverted, analytical, independent, detached</li>
-<li><strong>Wing 6w7 (The Buddy):</strong> More outgoing, playful, distractible, reassurance-seeking</li>
-</ul>
+let currentView = 'list';
+let compareSelections = [];
 
-<hr>
-<h2>✨ Type 7 – The Enthusiast</h2>
-<p><strong>Core:</strong> Spontaneous, versatile, distractible, scattered</p>
-<p><strong>Fear:</strong> Being deprived or trapped in pain</p>
-<p><strong>Desire:</strong> To be satisfied and fulfilled</p>
-<ul>
-<li><strong>Wing 7w6 (The Entertainer):</strong> More loyal, endearing, anxious, relationship-oriented</li>
-<li><strong>Wing 7w8 (The Realist):</strong> More assertive, pragmatic, competitive, intense</li>
-</ul>
+function buildCard(type, forceExpanded) {
+  const expanded = forceExpanded ? ' expanded' : '';
+  const traitsHTML = type.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+  const wingsHTML = type.wings.map(w => `
+    <div class="wing-card">
+      <div class="wing-name">${w.code} — ${w.name}</div>
+      <div class="wing-desc">${w.desc}</div>
+    </div>
+  `).join('');
 
-<hr>
-<h2>💪 Type 8 – The Challenger</h2>
-<p><strong>Core:</strong> Self-confident, decisive, willful, confrontational</p>
-<p><strong>Fear:</strong> Being controlled or harmed by others</p>
-<p><strong>Desire:</strong> To protect themselves and control their fate</p>
-<ul>
-<li><strong>Wing 8w7 (The Maverick):</strong> More energetic, outgoing, impulsive, entrepreneurial</li>
-<li><strong>Wing 8w9 (The Bear):</strong> More calm, receptive, stubborn, quietly commanding</li>
-</ul>
+  return `
+    <div class="type-card type-${type.num}${expanded}" data-type="${type.num}" onclick="toggleCard(this, event)">
+      <div class="card-header">
+        <div class="card-emoji">${type.emoji}</div>
+        <div class="card-title-group">
+          <div class="card-number">Type ${type.num}</div>
+          <div class="card-name">${type.name}</div>
+        </div>
+        <div class="card-chevron">▽</div>
+      </div>
+      <div class="card-preview">${type.traits.join(' · ')}</div>
+      <div class="card-body">
+        <div class="card-content">
+          <div class="card-section">
+            <div class="card-label">Core Traits</div>
+            <div class="core-traits">${traitsHTML}</div>
+          </div>
+          <div class="card-section">
+            <div class="card-label">Core Fear</div>
+            <div class="card-value">${type.fear}</div>
+          </div>
+          <div class="card-section">
+            <div class="card-label">Core Desire</div>
+            <div class="card-value">${type.desire}</div>
+          </div>
+          <div class="card-section">
+            <div class="card-label">Wings</div>
+            ${wingsHTML}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-<hr>
-<h2>🕊️ Type 9 – The Peacemaker</h2>
-<p><strong>Core:</strong> Receptive, reassuring, agreeable, complacent</p>
-<p><strong>Fear:</strong> Loss and separation</p>
-<p><strong>Desire:</strong> Inner peace and stability</p>
-<ul>
-<li><strong>Wing 9w8 (The Comfort Seeker):</strong> More assertive, grounded, stubborn, body-aware</li>
-<li><strong>Wing 9w1 (The Dreamer):</strong> More idealistic, orderly, detached, principled</li>
-</ul>
+function render() {
+  const container = document.getElementById('card-container');
+  const compareContainer = document.getElementById('compare-container');
+  const hint = document.getElementById('compare-hint');
+
+  if (currentView === 'compare') {
+    container.style.display = 'none';
+    compareContainer.style.display = 'grid';
+    hint.classList.add('visible');
+    renderCompare();
+    renderCompareSelectors();
+  } else {
+    container.style.display = '';
+    compareContainer.style.display = 'none';
+    hint.classList.remove('visible');
+    container.className = currentView === 'grid' ? 'grid-view' : 'list-view';
+    container.innerHTML = types.map(t => buildCard(t, false)).join('');
+  }
+}
+
+function renderCompareSelectors() {
+  const container = document.getElementById('card-container');
+  container.style.display = '';
+  container.className = 'grid-view';
+  container.innerHTML = types.map(t => {
+    const selected = compareSelections.includes(t.num);
+    return `
+      <div class="type-card type-${t.num}${selected ? ' compare-selected' : ''}" data-type="${t.num}" onclick="toggleCompare(${t.num})">
+        <div class="card-header">
+          <div class="card-emoji">${t.emoji}</div>
+          <div class="card-title-group">
+            <div class="card-number">Type ${t.num}</div>
+            <div class="card-name">${t.name}</div>
+          </div>
+        </div>
+        <div class="card-preview">${t.traits.join(' · ')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderCompare() {
+  const compareContainer = document.getElementById('compare-container');
+  if (compareSelections.length === 0) {
+    compareContainer.innerHTML = `
+      <div class="compare-placeholder">Select a first type above</div>
+      <div class="compare-placeholder">Select a second type above</div>
+    `;
+  } else if (compareSelections.length === 1) {
+    const t = types.find(t => t.num === compareSelections[0]);
+    compareContainer.innerHTML = buildCard(t, true) +
+      `<div class="compare-placeholder">Select a second type above</div>`;
+  } else {
+    compareContainer.innerHTML = compareSelections.map(num => {
+      const t = types.find(t => t.num === num);
+      return buildCard(t, true);
+    }).join('');
+  }
+}
+
+function toggleCompare(num) {
+  const idx = compareSelections.indexOf(num);
+  if (idx > -1) {
+    compareSelections.splice(idx, 1);
+  } else if (compareSelections.length < 2) {
+    compareSelections.push(num);
+  } else {
+    compareSelections.shift();
+    compareSelections.push(num);
+  }
+  renderCompare();
+  renderCompareSelectors();
+}
+
+function toggleCard(el, event) {
+  if (currentView === 'compare') return;
+  el.classList.toggle('expanded');
+}
+
+function setView(view) {
+  currentView = view;
+  compareSelections = [];
+  document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+  if (view === 'list') document.getElementById('btn-all').classList.add('active');
+  if (view === 'grid') document.getElementById('btn-grid').classList.add('active');
+  if (view === 'compare') document.getElementById('btn-compare').classList.add('active');
+  render();
+}
+
+function expandAll() {
+  if (currentView === 'compare') return;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.add('expanded'));
+}
+
+function collapseAll() {
+  if (currentView === 'compare') return;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('expanded'));
+}
+
+render();
+</script>
 
 </body>
 </html>
