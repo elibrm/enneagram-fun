@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { types } from 'types';
-import TypeCard from 'TypeCard';
-import { compatibility, Tip } from '@/data/compatibility';
+import { types } from './types';
+import TypeCard from './TypeCard';
+import { compatibility, Tip } from './compatibility';
+import GettingAlongTips from './GettingAlongTips';
 
 type View = 'list' | 'grid' | 'compare';
 
