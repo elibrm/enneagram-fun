@@ -1,7 +1,7 @@
 'use client';
 
-import { EnneagramType } from '@/data/types';
-import { Tip } from '@/data/compatibility';
+import { EnneagramType } from './types';
+import { Tip } from './compatibility';
 
 interface TypeCardProps {
   type: EnneagramType;
